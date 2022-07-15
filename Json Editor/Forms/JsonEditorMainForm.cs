@@ -2,8 +2,10 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace ZTn.Json.Editor.Forms
@@ -207,7 +209,7 @@ namespace ZTn.Json.Editor.Forms
 
         private void jsonValueTextBox_TextChanged(object sender, EventArgs e)
         {
-            if(!isValidating)
+            if (!isValidating)
             {
                 StartValidationTimer();
             }
@@ -297,12 +299,12 @@ namespace ZTn.Json.Editor.Forms
             jsonValidationTimer.Elapsed += (o, args) =>
             {
                 if (isValidating)
-                { 
-                    return; 
+                {
+                    return;
                 }
                 else
-                { 
-                    isValidating = true; 
+                {
+                    isValidating = true;
                 }
 
                 jsonValidationTimer.Stop();
@@ -322,11 +324,11 @@ namespace ZTn.Json.Editor.Forms
                 jTokenTree.UpdateSelected(jsonValueTextBox.Text);
                 //reformat json to be pretty
                 jsonValueTextBox.Text = JsonConvert.SerializeObject(
-                    JsonConvert.DeserializeObject(jsonValueTextBox.Text), 
+                    JsonConvert.DeserializeObject(jsonValueTextBox.Text),
                     Formatting.Indented);
 
                 SetJsonStatus("Json format validated.", false);
-               
+
             }
             catch (JsonReaderException exception)
             {
@@ -349,5 +351,33 @@ namespace ZTn.Json.Editor.Forms
                 e.Handled = true;
             }
         }
-    }
+
+        private void FindNextButton_Click(object sender, EventArgs e)
+        {
+            var ss = jTokenTree.jsonTreeView.Nodes.Find("", true).Where(n=>n.Text.Contains(searchBox.Text)).ToArray();
+            var currentIndex = Array.IndexOf(ss, jTokenTree.jsonTreeView.SelectedNode);
+            if (ss.Any()&& ss.Length> currentIndex + 1 )
+            {
+                  jTokenTree.jsonTreeView.SelectedNode = ss[currentIndex + 1]; 
+            }
+         
+            //var tn = jTokenTree.jsonTreeView.NextNodes().FirstOrDefault(x => x.Text.Contains(searchBox.Text));
+
+            //if (tn == null)
+            //    MessageBox.Show("查找完毕");
+            //else
+            //    jTokenTree.jsonTreeView.SelectedNode = tn;
+        }
+
+        private void findPreviousButton_Click(object sender, EventArgs e)
+        {
+            var ss = jTokenTree.jsonTreeView.Nodes.Find("", true).Where(n => n.Text.Contains(searchBox.Text)).ToArray();
+           var currentIndex= Array.IndexOf(ss, jTokenTree.jsonTreeView.SelectedNode);
+           if (ss.Any() && ss.Length > currentIndex && currentIndex - 1>=0)
+           {
+               jTokenTree.jsonTreeView.SelectedNode = ss[currentIndex - 1];
+           }
+
+        }
+    } 
 }
